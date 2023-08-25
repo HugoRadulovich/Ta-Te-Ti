@@ -37,7 +37,10 @@ const Square = ({children,isSelected,updateBoard,index}) => {
 
 function App() {
 
-  const [board, setBoard] = useState(Array(9).fill(null));
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    return boardFromStorage ? JSON.parse(boardFromStorage) : Array(9).fill(null)
+  })
   const [turn, setTurn] = useState(TURNS.X);
   // null es que no hay ganador, false empate
   const [winner, setWinner] = useState(null)
@@ -72,8 +75,10 @@ function App() {
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn);
 
+    window.localStorage.setItem('board', JSON.stringify(newBoard))
+    window.localStorage.setItem('turn',newTurn)
+
     const newWinner = checkWinner(newBoard);
-    console.log(newWinner);
     if(newWinner !== null){
       setWinner(newWinner)
     }else if(checkEndGame(newBoard)){
@@ -81,11 +86,19 @@ function App() {
     }
   }
 
+  const onResetGame = () => {
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
+    window.localStorage.removeItem('board')
+    window.localStorage.removeItem('turn')
+  };
+
   return (
     <>
       <main className="board">
         <h1 className="">Ta Te Ti</h1>
-        <button className="">Resetear Juego</button>
+        <button className="button-reset" onClick={onResetGame}>Comenzar de nuevo!</button>
         <section className="game">
           {
             board.map((square,index) =>{
